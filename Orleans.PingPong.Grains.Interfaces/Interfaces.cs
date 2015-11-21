@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Orleans.Concurrency;
 
 namespace Orleans.PingPong
 {
@@ -8,7 +9,7 @@ namespace Orleans.PingPong
     public class Message
     {}
 
-    public interface IClient : IGrain
+    public interface IClient : IGrainWithStringKey
     {
         Task Run();
         Task Pong(IDestination from, Message message);
@@ -21,7 +22,7 @@ namespace Orleans.PingPong
         void Done(long pings, long pongs);
     }
 
-    public interface IDestination : IGrain
+    public interface IDestination : IGrainWithStringKey
     {
         Task Ping(IClient from, Message message);
     }

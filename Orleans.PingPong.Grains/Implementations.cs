@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Orleans.Concurrency;
+using Orleans.Runtime;
 
 namespace Orleans.PingPong
 {
-    public class Client : GrainBase, IClient
+    public class Client : Grain, IClient
     {
         static readonly Message msg = new Message();
 
@@ -15,7 +17,7 @@ namespace Orleans.PingPong
         long pongs;
         long repeats;
 
-        public override Task ActivateAsync()
+        public override Task OnActivateAsync()
         {
             subscribers = new ObserverSubscriptionManager<IClientObserver>();
             return TaskDone.Done;
@@ -61,7 +63,7 @@ namespace Orleans.PingPong
         }
     }
 
-    public class Destination : GrainBase, IDestination
+    public class Destination : Grain, IDestination
     {
         public Task Ping(IClient @from, Message message)
         {

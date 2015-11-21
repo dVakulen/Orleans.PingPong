@@ -30,13 +30,11 @@ namespace Orleans.PingPong
 
             for (var i = 0; i < numberOfClients; i++)
             {
-                var destination = DestinationFactory.GetGrain(Guid.NewGuid());
-
-                var client = ClientFactory.GetGrain(Guid.NewGuid());
+                var destination = GrainClient.GrainFactory.GetGrain<IDestination>(Guid.NewGuid().ToString());
+                var client = GrainClient.GrainFactory.GetGrain<IClient>(Guid.NewGuid().ToString());
                 await client.Initialize(destination, numberOfRepeatsPerClient);
-
                 var observer = new ClientObserver();
-                await client.Subscribe(ClientObserverFactory.CreateObjectReference(observer).Result);
+                await client.Subscribe(GrainClient.GrainFactory.CreateObjectReference< IClientObserver>(observer).Result);
                 
                 clients.Add(client);
                 observers.Add(observer); // to prevent GC collection of observer
@@ -65,8 +63,11 @@ namespace Orleans.PingPong
 
         void WriteResultsToFile(Stopwatch stopwatch)
         {
-            using (var writer = File.AppendText(resultsFile))
-                WriteResults(stopwatch, writer);
+            if (Directory.Exists(resultsFile))
+            {
+                using (var writer = File.AppendText(resultsFile))
+                    WriteResults(stopwatch, writer);
+            }
         }
 
         void WriteResults(Stopwatch stopwatch, TextWriter writer)
